@@ -2,25 +2,17 @@ FROM node:lts-alpine
 
 RUN apk add --no-cache tini
 
-RUN corepack enable
-
-RUN npm config set registry https://registry.npmmirror.com && npm install -g pnpm --force
+RUN npm config set registry https://registry.npmmirror.com
 
 ENV NODE_ENV=production
 
 WORKDIR /app
 
-RUN chown node:node /app
+COPY package.json package-lock.json ./
 
-COPY --chown=node:node package.json pnpm-lock.yaml ./
+RUN npm install --production --ignore-scripts=false --legacy-peer-deps
 
-USER node
-
-#RUN pnpm install --prod --frozen-lockfile --ignore-scripts false
-
-RUN npm install --production --ignore-scripts=false
-
-COPY --chown=node:node . ./
+COPY . .
 
 EXPOSE 3000
 
